@@ -1,11 +1,13 @@
 import React from 'react';
-import { FormProvider, SubmitHandler, useForm, ControllerRenderProps } from 'react-hook-form';
+import { FormProvider, SubmitHandler, useForm, ControllerRenderProps, useWatch } from 'react-hook-form';
 import { FormField, FormItem } from '../ui/form';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { FormSchema, SelectOption } from './type';
+import { mergeWith } from 'lodash';
+import { SelectRemoteOption } from './SelectRemoteOption';
 
 const fieldGenerator = (
   type: string,
@@ -35,6 +37,13 @@ const fieldGenerator = (
   }
 
   if (type === 'select-remote-option') {
+    const optionConfig = mergeWith(
+      { ...rest.remoteOption },
+      { valueKey: 'value', labelKey: 'label' },
+      (objValue, srcValue) => objValue ?? srcValue
+    );
+
+    return <SelectRemoteOption field={field} optionConfig={optionConfig} />;
   }
   return <div>Not available</div>;
 };
@@ -43,6 +52,10 @@ export function FormGenerator({ schema, onSubmit }: FormGeneratorProps) {
   const methods = useForm<Record<string, any>>({
     defaultValues: {},
   });
+
+  const { control } = methods;
+
+  const formValues = useWatch({ control });
 
   return (
     <FormProvider {...methods}>
@@ -64,7 +77,7 @@ export function FormGenerator({ schema, onSubmit }: FormGeneratorProps) {
           );
         })}
 
-        <pre className="whitespace-break-spaces">{JSON.stringify(schema, null, 4)}</pre>
+        <pre className="whitespace-break-spaces">{JSON.stringify(formValues, null, 4)}</pre>
       </form>
     </FormProvider>
   );

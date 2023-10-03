@@ -12,13 +12,24 @@ import * as z from 'zod';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 import { SelectFixedOptionForm } from './SelectFixedOptionForm';
 import { FormSchema } from './type';
+import { SelectRemoteOptionForm } from './SelectRemoteOptionForm';
 
 const formSchema = z.object({
   schema: z
     .object({
       type: z.string().min(1),
       name: z.string().min(1),
-      options: z.object({ value: z.string().min(1), label: z.string().min(1) }).array(),
+      options: z
+        .object({ value: z.string().min(1), label: z.string().min(1) })
+        .array()
+        .optional(),
+      remoteOption: z
+        .object({
+          endpoint: z.string().min(1),
+          valueKey: z.string().optional(),
+          labelKey: z.string().optional(),
+        })
+        .optional(),
     })
     // .refine(
     //   (val) => {
@@ -35,7 +46,18 @@ export function RegularForm({ onSubmit }: RegularFormProps) {
   const t = useTranslations('form');
 
   const methods = useForm<FormSchema>({
-    defaultValues: { schema: [] },
+    defaultValues: {
+      schema: [
+        {
+          type: 'select-remote-option',
+          name: 'select-remote-option',
+          remoteOption: {
+            endpoint: 'https://651bfcdd194f77f2a5af317f.mockapi.io/admin-template/api/select-data',
+            valueKey: 'id',
+          },
+        },
+      ],
+    },
     resolver: zodResolver(formSchema),
   });
 
@@ -92,6 +114,7 @@ export function RegularForm({ onSubmit }: RegularFormProps) {
                         <SelectGroup>
                           <SelectLabel>Select component</SelectLabel>
                           <SelectItem value="select-fixed-option">Select with fixed options</SelectItem>
+                          <SelectItem value="select-remote-option">Select with remote options</SelectItem>
                         </SelectGroup>
                       </SelectContent>
                     </Select>
@@ -119,6 +142,9 @@ export function RegularForm({ onSubmit }: RegularFormProps) {
 
               {componentType === 'select-fixed-option' ? (
                 <SelectFixedOptionForm index={index} className="col-span-2" />
+              ) : null}
+              {componentType === 'select-remote-option' ? (
+                <SelectRemoteOptionForm index={index} className="col-span-2" />
               ) : null}
 
               <Button

@@ -4,6 +4,7 @@ import { locales } from '../../../locales';
 
 import '../globals.css';
 import { NextIntlClientProvider } from 'next-intl';
+import { AppErrorBoundary } from '~/components/AppErrorBoundary';
 
 export default async function LocaleLayout({ children, params: { lang } }: LocaleLayoutProps) {
   // Validate that the incoming `locale` parameter is valid
@@ -20,7 +21,9 @@ export default async function LocaleLayout({ children, params: { lang } }: Local
   return (
     <html lang={lang}>
       <NextIntlClientProvider locale={lang} messages={messages}>
-        <body>{children}</body>
+        <AppErrorBoundary>
+          <body>{children}</body>
+        </AppErrorBoundary>
       </NextIntlClientProvider>
     </html>
   );
