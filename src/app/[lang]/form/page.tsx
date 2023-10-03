@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FormGenerator } from '~/components/FormGenerator';
-import { FormSchema, RegularForm } from '~/components/RegularForm';
+import { FormSchema, FormGenerator, RegularForm } from '~/components/form';
 
 export default function Page() {
   const [formSchema, setFormSchema] = useState<FormSchema['schema']>([]);
@@ -17,7 +16,7 @@ export default function Page() {
   };
 
   return (
-    <div className="flex justify-between w-screen h-screen p-4 gap-4">
+    <div className="grid grid-cols-2 justify-between w-screen h-screen p-4 gap-4">
       <div className="border border-gray-200 rounded p-4 flex-1">
         <RegularForm onSubmit={handleSubmitFormSchema} />
       </div>

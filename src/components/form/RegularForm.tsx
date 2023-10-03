@@ -1,22 +1,32 @@
 import { useTranslations } from 'next-intl';
 import React from 'react';
-import { useForm, useFieldArray, SubmitHandler, FormProvider } from 'react-hook-form';
-import { Label } from './ui/label';
-import { Input } from './ui/input';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from './ui/select';
-import { FormField, FormItem, FormMessage } from './ui/form';
-import { Button } from './ui/button';
-import { get } from 'lodash';
+import { useForm, useFieldArray, SubmitHandler, FormProvider, useWatch, SubmitErrorHandler } from 'react-hook-form';
+import { Label } from '../ui/label';
+import { Input } from '../ui/input';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
+import { FormField, FormItem, FormMessage } from '../ui/form';
+import { Button } from '../ui/button';
+import { get, last } from 'lodash';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { XMarkIcon } from '@heroicons/react/24/solid';
+import { SelectFixedOptionForm } from './SelectFixedOptionForm';
+import { FormSchema } from './type';
 
 const formSchema = z.object({
   schema: z
     .object({
       type: z.string().min(1),
       name: z.string().min(1),
+      options: z.object({ value: z.string().min(1), label: z.string().min(1) }).array(),
     })
+    // .refine(
+    //   (val) => {
+    //     if (val.type === 'select-fixed-option' && val.options?.length === 0) return false;
+    //     return true;
+    //   },
+    //   { message: 'Select must have at least 1 option',  }
+    // )
     .array()
     .min(1),
 });
@@ -28,35 +38,43 @@ export function RegularForm({ onSubmit }: RegularFormProps) {
     defaultValues: { schema: [] },
     resolver: zodResolver(formSchema),
   });
+
+  const { handleSubmit, control, watch, clearErrors, getValues, resetField } = methods;
+
   const { fields, append, prepend, remove, swap, move, insert } = useFieldArray({
-    control: methods.control,
+    control: control,
     name: 'schema',
   });
 
   const handleAddComponent = () => {
-    const items = methods.getValues('schema');
-    const lastItemInArray = get(items, `${Math.max(items.length - 1, 0)}`);
-
+    const items = getValues('schema');
+    // const lastItemInArray = get(items, `${Math.max(items.length - 1, 0)}`);
     // if (lastItemInArray && lastItemInArray.type === '' && lastItemInArray.name === '') return;
 
     append({ type: '', name: '' });
-    methods.clearErrors(`schema.${Math.max(items.length, 0)}`);
+    clearErrors(`schema.${Math.max(items.length, 0)}`);
   };
 
   const handleRemoveComponent = (idx: number) => {
     remove(idx);
   };
 
-  const formValues = methods.watch();
+  const formValues = useWatch({ control });
+
+  const handleError: SubmitErrorHandler<FormSchema> = (error, event) => {
+    console.log('🚀 ~ handleError ~ error:', error, event);
+  };
 
   return (
     <FormProvider {...methods}>
-      <form className="space-y-4" onSubmit={methods.handleSubmit(onSubmit)}>
+      <form className="space-y-4" onSubmit={handleSubmit(onSubmit, handleError)}>
         {fields.map((item, index) => {
+          const componentType = get(formValues.schema, `${index}.type`);
+
           return (
             <div key={item.id} className="grid grid-cols-2 gap-4 pr-12 relative">
               <FormField
-                control={methods.control}
+                control={control}
                 name={`schema.${index}.type`}
                 render={({ field }) => (
                   <FormItem>
@@ -69,7 +87,11 @@ export function RegularForm({ onSubmit }: RegularFormProps) {
                         <SelectGroup>
                           <SelectLabel>Simple component</SelectLabel>
                           <SelectItem value="input">Input</SelectItem>
-                          <SelectItem value="select">Select</SelectItem>
+                          <SelectItem value="textarea">Textarea</SelectItem>
+                        </SelectGroup>
+                        <SelectGroup>
+                          <SelectLabel>Select component</SelectLabel>
+                          <SelectItem value="select-fixed-option">Select with fixed options</SelectItem>
                         </SelectGroup>
                       </SelectContent>
                     </Select>
@@ -79,7 +101,7 @@ export function RegularForm({ onSubmit }: RegularFormProps) {
               />
 
               <FormField
-                control={methods.control}
+                control={control}
                 name={`schema.${index}.name`}
                 render={({ field }) => (
                   <FormItem>
@@ -94,6 +116,10 @@ export function RegularForm({ onSubmit }: RegularFormProps) {
                   </FormItem>
                 )}
               />
+
+              {componentType === 'select-fixed-option' ? (
+                <SelectFixedOptionForm index={index} className="col-span-2" />
+              ) : null}
 
               <Button
                 variant="outline"
@@ -116,7 +142,7 @@ export function RegularForm({ onSubmit }: RegularFormProps) {
           </Button>
         </div>
 
-        <pre>{JSON.stringify(formValues, null, 4)}</pre>
+        <pre className="whitespace-break-spaces">{JSON.stringify(formValues, null, 4)}</pre>
       </form>
     </FormProvider>
   );
@@ -125,9 +151,3 @@ export function RegularForm({ onSubmit }: RegularFormProps) {
 type RegularFormProps = {
   onSubmit: SubmitHandler<FormSchema>;
 };
-
-export type FormSchema = {
-  schema: FormItem[];
-};
-
-type FormItem = { type: string; name: string };

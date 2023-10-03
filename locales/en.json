@@ -1,24 +1,25 @@
 {
   "auth": {
-    "password": "Password",
-    "sign_in_guide": "Please sign-in to your account and start the adventure",
-    "username": "Username",
-    "welcome_to": "Welcome to {name}",
-    "remember_login": "Remember me",
-    "sign_in": "Sign in",
+    "forget_password": "<a>Forget password?</a>",
     "new_user_guide": "New on our platform? <a>Create an account</a>",
     "or": "or",
-    "forget_password": "<a>Forget password?</a>"
+    "password": "Password",
+    "remember_login": "Remember me",
+    "sign_in": "Sign in",
+    "sign_in_guide": "Please sign-in to your account and start the adventure",
+    "username": "Username",
+    "welcome_to": "Welcome to {name}"
   },
   "common": {
-    "save": "Save",
+    "email": "Email",
     "name": "Name",
-    "email": "Email"
+    "save": "Save"
   },
   "form": {
-    "component_type": "Component type",
-    "component_name": "Component name",
     "add_component": "Add a component",
+    "add_option": "Add option",
+    "component_name": "Component name",
+    "component_type": "Component type",
     "generate": "Generate"
   }
 }
