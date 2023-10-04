@@ -19,7 +19,7 @@ export function SelectRemoteOptionForm({ index, className }: SelectRemoteOptionF
         render={({ field }) => (
           <FormItem className="col-span-2">
             <Label>API endpoint</Label>
-            <Input type="text" placeholder="Qui quis ut ullamco" onChange={field.onChange} defaultValue={field.value} />
+            <Input type="text" onChange={field.onChange} defaultValue={field.value} />
             <FormMessage />
           </FormItem>
         )}

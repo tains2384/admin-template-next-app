@@ -42,7 +42,7 @@ const formSchema = z.object({
     .min(1),
 });
 
-export function RegularForm({ onSubmit }: RegularFormProps) {
+export function FormBuilder({ onSubmit }: FormBuilderProps) {
   const t = useTranslations('form');
 
   const methods = useForm<FormSchema>({
@@ -94,7 +94,7 @@ export function RegularForm({ onSubmit }: RegularFormProps) {
           const componentType = get(formValues.schema, `${index}.type`);
 
           return (
-            <div key={item.id} className="grid grid-cols-2 gap-4 pr-12 relative">
+            <div key={item.id} className="grid grid-cols-2 gap-4 pr-14 relative p-3 rounded border border-gray-200">
               <FormField
                 control={control}
                 name={`schema.${index}.type`}
@@ -150,7 +150,7 @@ export function RegularForm({ onSubmit }: RegularFormProps) {
               <Button
                 variant="outline"
                 size="icon"
-                className="absolute right-0 top-[2.25em]"
+                className="absolute right-[0.5em] top-[3.125em]"
                 onClick={handleRemoveComponent.bind(null, index)}
               >
                 <XMarkIcon className="h-4 w-4 text-destructive" />
@@ -174,6 +174,6 @@ export function RegularForm({ onSubmit }: RegularFormProps) {
   );
 }
 
-type RegularFormProps = {
+type FormBuilderProps = {
   onSubmit: SubmitHandler<FormSchema>;
 };
