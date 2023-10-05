@@ -7,7 +7,7 @@ import { Label } from '~/components/ui/label';
 import { Input } from '~/components/ui/input';
 import { Checkbox } from '~/components/ui/checkbox';
 import { Button } from '~/components/ui/button';
-import Link from 'next/link';
+import Link from 'next-intl/link';
 
 import { BeakerIcon } from '@heroicons/react/24/solid';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -15,7 +15,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { FormField, FormItem, FormMessage } from '~/components/ui/form';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next-intl/client';
+import { locales } from '../../../../../locales';
+import { get } from 'lodash';
 
 const formSchema = z.object({
   username: z.string().min(1),
@@ -33,9 +36,11 @@ export default function Page() {
     resolver: zodResolver(formSchema),
   });
 
-  const { control, handleSubmit } = methods;
+  const { control, handleSubmit, formState } = methods;
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const params = useParams();
 
   const onSubmit = async (data: LoginPayload) => {
     const result = await signIn('credentials', {
@@ -43,11 +48,17 @@ export default function Page() {
       password: data.password,
       redirect: false,
     });
+    console.log('🚀 ~ onSubmit ~ result:', result);
 
-    if (result?.status === 200) {
-      console.log('Login success');
-      router.replace('/');
-      return;
+    if (result?.ok) {
+      let callbackUrl = searchParams.get('callbackUrl') || '/';
+
+      const localeDetect = RegExp(`^(/(${locales.join('|')}))`, 'i');
+      const hasLocaleInUrl = localeDetect.test(callbackUrl);
+      if (hasLocaleInUrl) callbackUrl = callbackUrl.slice(3);
+      const lang = get(params, 'lang', 'en') as string;
+
+      return router.replace(callbackUrl, { locale: lang });
     }
 
     console.log('Login fail:', result?.error);
@@ -100,7 +111,9 @@ export default function Page() {
             </label>
           </div>
 
-          <Button className="mt-5 w-full">{t('sign_in')}</Button>
+          <Button disabled={formState.isSubmitting} className="mt-5 w-full">
+            {t('sign_in')}
+          </Button>
 
           <p className="text-center mt-3">
             {t.rich('new_user_guide', {

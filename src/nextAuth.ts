@@ -1,4 +1,4 @@
-import { AuthOptions } from 'next-auth';
+import { AuthOptions, NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { pick } from 'lodash';
 
@@ -20,14 +20,19 @@ const providers = [
 ];
 
 export type UserSession = {
+  id: string;
   username: string;
   name: string;
 };
 
-export const nextAuthConfig = {
+const ONE_DAY_SECOND = 24 * 60 * 60;
+export const nextAuthConfig: NextAuthOptions = {
   providers,
-  session: { strategy: 'jwt' },
+  session: { strategy: 'jwt', maxAge: ONE_DAY_SECOND },
   secret: process.env.JWT_SECRET,
+  pages: {
+    signIn: '/auth/login',
+  },
   callbacks: {
     async jwt({ token, user }) {
       // Passed the data to session callback
@@ -36,7 +41,7 @@ export const nextAuthConfig = {
     },
     async session({ session, token }) {
       // Write user's info into session
-      const userInfo = pick<UserSession>(token.user as any, ...['username', 'name']);
+      const userInfo = pick<UserSession>(token.user as any, ...['id', 'username', 'name']);
       session.user = userInfo;
       return session;
     },

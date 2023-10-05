@@ -9,8 +9,8 @@ const queryClient = new QueryClient();
 
 export function ClientProvider({ children, session }: React.PropsWithChildren & { session: Session | null }) {
   return (
-    <SessionProvider>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+    <SessionProvider session={session} basePath={process.env.NEXTAUTH_URL}>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </SessionProvider>
   );
 }

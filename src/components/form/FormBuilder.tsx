@@ -154,7 +154,7 @@ export function FormBuilder({ onSubmit }: FormBuilderProps) {
           <Button type="button" variant="outline" className="w-full" onClick={handleAddComponent}>
             {t('add_component')}
           </Button>
-          <Button disabled={fields.length === 0} type="submit" className="w-full">
+          <Button disabled={fields.length === 0 || formState.isSubmitting} type="submit" className="w-full">
             {t('generate')}
           </Button>
         </div>

@@ -1,0 +1,25 @@
+{
+  "auth": {
+    "forget_password": "<a>Quên mật khẩu?</a>",
+    "new_user_guide": "Chưa có tài khoản? <a>Tạo ngay</a>",
+    "or": "hoặc",
+    "password": "Mật khẩu",
+    "remember_login": "Ghi nhớ đăng nhập",
+    "sign_in": "Đăng nhập",
+    "sign_in_guide": "Please sign-in to your account and start the adventure",
+    "username": "Tên đăng nhập",
+    "welcome_to": "Chào mừng {name}"
+  },
+  "common": {
+    "email": "Email",
+    "name": "Tên",
+    "save": "Lưu"
+  },
+  "form": {
+    "add_component": "Add a component",
+    "add_option": "Add option",
+    "component_name": "Component name",
+    "component_type": "Component type",
+    "generate": "Generate"
+  }
+}
