@@ -6,6 +6,8 @@ import '../globals.css';
 import { NextIntlClientProvider } from 'next-intl';
 import { AppErrorBoundary } from '~/components/AppErrorBoundary';
 import { ClientProvider } from '~/components/ClientProvider';
+import { getServerSession } from 'next-auth';
+import { nextAuthConfig } from '~/nextAuth';
 
 export default async function LocaleLayout({ children, params: { lang } }: LocaleLayoutProps) {
   // Validate that the incoming `locale` parameter is valid
@@ -19,12 +21,14 @@ export default async function LocaleLayout({ children, params: { lang } }: Local
     notFound();
   }
 
+  const session = await getServerSession(nextAuthConfig);
+
   return (
     <html lang={lang}>
       <NextIntlClientProvider locale={lang} messages={messages}>
         <body>
           <AppErrorBoundary>
-            <ClientProvider>{children}</ClientProvider>
+            <ClientProvider session={session}>{children}</ClientProvider>
           </AppErrorBoundary>
         </body>
       </NextIntlClientProvider>

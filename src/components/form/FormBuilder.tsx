@@ -1,18 +1,24 @@
 import { useTranslations } from 'next-intl';
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm, useFieldArray, SubmitHandler, FormProvider, useWatch, SubmitErrorHandler } from 'react-hook-form';
-import { Label } from '../ui/label';
-import { Input } from '../ui/input';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
-import { FormField, FormItem, FormMessage } from '../ui/form';
 import { Button } from '../ui/button';
-import { get, last } from 'lodash';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { XMarkIcon } from '@heroicons/react/24/solid';
-import { SelectFixedOptionForm } from './SelectFixedOptionForm';
 import { FormSchema } from './type';
-import { SelectRemoteOptionForm } from './SelectRemoteOptionForm';
+import { FormBuilderItem } from './FormBuilderItem';
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverEvent,
+  DragOverlay,
+  DragStartEvent,
+  UniqueIdentifier,
+  closestCenter,
+  closestCorners,
+} from '@dnd-kit/core';
+import { SortableContext } from '@dnd-kit/sortable';
+import { SortableItem } from '../SortableItem';
+import { FormBuilderItemOverlay } from './FormBuilderItemOverlay';
 
 const formSchema = z.object({
   schema: z
@@ -61,103 +67,88 @@ export function FormBuilder({ onSubmit }: FormBuilderProps) {
     resolver: zodResolver(formSchema),
   });
 
-  const { handleSubmit, control, watch, clearErrors, getValues, resetField } = methods;
+  const { handleSubmit, control, clearErrors, getValues, formState } = methods;
 
-  const { fields, append, prepend, remove, swap, move, insert } = useFieldArray({
+  const { fields, append, move } = useFieldArray({
     control: control,
     name: 'schema',
   });
+
+  const [draggingId, setDraggingId] = useState<UniqueIdentifier>('');
 
   const handleAddComponent = () => {
     const items = getValues('schema');
     // const lastItemInArray = get(items, `${Math.max(items.length - 1, 0)}`);
     // if (lastItemInArray && lastItemInArray.type === '' && lastItemInArray.name === '') return;
 
-    append({ type: '', name: '' });
+    append({ type: 'input', name: '' });
     clearErrors(`schema.${Math.max(items.length, 0)}`);
   };
 
-  const handleRemoveComponent = (idx: number) => {
-    remove(idx);
+  const formValue = useWatch({ control });
+
+  const handleError: SubmitErrorHandler<FormSchema> = (error) => {
+    console.log('🚀 ~ handleError ~ error:', error);
   };
 
-  const formValues = useWatch({ control });
+  const handleDragStart = (event: DragStartEvent) => {
+    setDraggingId(event.active.id);
+  };
 
-  const handleError: SubmitErrorHandler<FormSchema> = (error, event) => {
-    console.log('🚀 ~ handleError ~ error:', error, event);
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const activeIdx = fields.findIndex((field) => field.id === active.id);
+      const overIdx = fields.findIndex((field) => field.id === over.id);
+      move(activeIdx, overIdx);
+    }
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setDraggingId('');
+    // const { active, over } = event;
+
+    // if (over && active.id !== over.id) {
+    //   const activeIdx = fields.findIndex((field) => field.id === active.id);
+    //   const overIdx = fields.findIndex((field) => field.id === over.id);
+    //   move(activeIdx, overIdx);
+    // }
   };
 
   return (
     <FormProvider {...methods}>
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit, handleError)}>
-        {fields.map((item, index) => {
-          const componentType = get(formValues.schema, `${index}.type`);
+        {/* <DndContext
+          autoScroll={false}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragEnd}
+        >
+          <SortableContext items={fields}>
+            {fields.map((item, index) => (
+              <SortableItem key={item.id} id={item.id}>
+                <FormBuilderItem index={index} isDragging={!!draggingId} />
+              </SortableItem>
+            ))}
+          </SortableContext>
 
-          return (
-            <div key={item.id} className="grid grid-cols-2 gap-4 pr-14 relative p-3 rounded border border-gray-200">
-              <FormField
-                control={control}
-                name={`schema.${index}.type`}
-                render={({ field }) => (
-                  <FormItem>
-                    <Label>{t('component_type')}</Label>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <SelectTrigger className="">
-                        <SelectValue placeholder="Select a component type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Simple component</SelectLabel>
-                          <SelectItem value="input">Input</SelectItem>
-                          <SelectItem value="textarea">Textarea</SelectItem>
-                        </SelectGroup>
-                        <SelectGroup>
-                          <SelectLabel>Select component</SelectLabel>
-                          <SelectItem value="select-fixed-option">Select with fixed options</SelectItem>
-                          <SelectItem value="select-remote-option">Select with remote options</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+          <DragOverlay>
+            {draggingId ? (
+              <FormBuilderItemOverlay
+                index={fields.findIndex((field) => field.id === draggingId)}
+                formState={formState}
+                formValue={formValue}
               />
+            ) : null}
+          </DragOverlay>
+        </DndContext> */}
 
-              <FormField
-                control={control}
-                name={`schema.${index}.name`}
-                render={({ field }) => (
-                  <FormItem>
-                    <Label>{t('component_name')}</Label>
-                    <Input
-                      type="text"
-                      placeholder="Qui quis ut ullamco"
-                      onChange={field.onChange}
-                      defaultValue={field.value}
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {componentType === 'select-fixed-option' ? (
-                <SelectFixedOptionForm index={index} className="col-span-2" />
-              ) : null}
-              {componentType === 'select-remote-option' ? (
-                <SelectRemoteOptionForm index={index} className="col-span-2" />
-              ) : null}
-
-              <Button
-                variant="outline"
-                size="icon"
-                className="absolute right-[0.5em] top-[3.125em]"
-                onClick={handleRemoveComponent.bind(null, index)}
-              >
-                <XMarkIcon className="h-4 w-4 text-destructive" />
-              </Button>
-            </div>
-          );
-        })}
+        {fields.map((item, index) => (
+          <FormBuilderItem key={item.id} index={index} />
+        ))}
 
         <div className="grid grid-cols-2 gap-4">
           <Button type="button" variant="outline" className="w-full" onClick={handleAddComponent}>
@@ -168,7 +159,7 @@ export function FormBuilder({ onSubmit }: FormBuilderProps) {
           </Button>
         </div>
 
-        <pre className="whitespace-break-spaces">{JSON.stringify(formValues, null, 4)}</pre>
+        <pre className="whitespace-break-spaces">{JSON.stringify(formValue, null, 4)}</pre>
       </form>
     </FormProvider>
   );

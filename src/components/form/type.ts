@@ -6,7 +6,7 @@ export type SelectRemoteOptionConfig = {
   labelKey?: string;
 };
 
-type FormItem = {
+export type FormItem = {
   type: string;
   name: string;
   options?: SelectOption[];
