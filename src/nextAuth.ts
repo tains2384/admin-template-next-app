@@ -1,6 +1,6 @@
 import { AuthOptions, NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { pick } from 'lodash';
+import pick from 'lodash/pick';
 
 const providers = [
   CredentialsProvider({
