@@ -1,6 +1,6 @@
 import { AuthOptions, NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { pick } from 'lodash';
+// import { pick } from 'lodash';
 
 const providers = [
   CredentialsProvider({
@@ -41,7 +41,13 @@ export const nextAuthConfig: NextAuthOptions = {
     },
     async session({ session, token }) {
       // Write user's info into session
-      const userInfo = pick<UserSession>(token.user as any, ...['id', 'username', 'name']);
+      // const userInfo = pick<UserSession>(token.user as any, ...['id', 'username', 'name']);
+      const user = token.user as any;
+      const userInfo = {
+        id: user?.id,
+        username: user?.username,
+        name: user?.name,
+      };
       session.user = userInfo;
       return session;
     },
