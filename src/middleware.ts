@@ -44,5 +44,5 @@ export const config = {
 
   // Fix lodash build error on vercel
   runtime: 'experimental-edge',
-  unstable_allowDynamic: ['**/node_modules/lodash-es/**/*.js'],
+  unstable_allowDynamic: ['**/node_modules/lodash/**/*.js'],
 };
