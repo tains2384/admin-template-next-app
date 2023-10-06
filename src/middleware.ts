@@ -41,8 +41,4 @@ export const config = {
   // Skip all paths that should not be internationalized. This example skips
   // certain folders and all pathnames with a dot (e.g. favicon.ico)
   matcher: ['/((?!api|_next|_vercel|.*\\..*).*)'],
-
-  // Fix lodash build error on vercel
-  runtime: 'experimental-edge',
-  unstable_allowDynamic: ['**/node_modules/lodash/**/*.js'],
 };
