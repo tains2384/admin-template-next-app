@@ -68,7 +68,7 @@ export default function Page() {
     <div className="flex items-center justify-center p-10">
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Image src="/next.svg" width={100} height={100} alt="" />
+          <Image src="/next.svg" width={100} height={20} alt="" />
           <h2 className="mt-3 text-lg font-semibold">{t('welcome_to', { name: 'AdminTemplate' })}</h2>
           <h3 className="">{t('sign_in_guide')}</h3>
 

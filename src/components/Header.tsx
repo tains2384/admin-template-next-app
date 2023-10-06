@@ -10,7 +10,7 @@ export function Header() {
     <div className="shadow">
       <div className="container flex justify-between items-center py-2">
         <h1>
-          <Image src="/next.svg" width={100} height={24} alt="Logo" />
+          <Image src="/next.svg" width={100} height={20} priority alt="Logo" />
         </h1>
 
         <div className="flex items-center gap-3">
