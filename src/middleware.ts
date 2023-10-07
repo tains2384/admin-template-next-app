@@ -1,7 +1,9 @@
-import { withAuth, withIntl, withLog } from './middlewares';
+import { withAuth } from './middlewares';
+import { withIntl } from './middlewares/withIntl';
 import { MiddlewareFactory, executeMiddlewares } from './utils/executeMiddlewares';
 
-const middlewares: MiddlewareFactory[] = [withLog, withAuth, withIntl];
+// withIntl should be the last executed middleware
+const middlewares: MiddlewareFactory[] = [withAuth, withIntl];
 export default executeMiddlewares(middlewares);
 
 export const config = {
