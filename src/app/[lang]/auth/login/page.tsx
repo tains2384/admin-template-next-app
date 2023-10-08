@@ -58,6 +58,7 @@ export default function Page() {
       if (hasLocaleInUrl) callbackUrl = callbackUrl.slice(3);
       const lang = get(params, 'lang', 'en') as string;
 
+      router.refresh();
       return router.replace(callbackUrl, { locale: lang });
     }
 

@@ -20,7 +20,13 @@ export const withAuth: MiddlewareFactory = (next: NextMiddleware) => {
         return next(req, _next);
       },
       {
-        callbacks: { authorized: ({ token }) => token != null },
+        callbacks: {
+          authorized: ({ token }) => {
+            // console.log('🚀 ~ return ~ token:', token);
+            // TODO: Validate user's permissions here
+            return token != null;
+          },
+        },
         pages: nextAuthConfig.pages,
         secret: nextAuthConfig.secret,
         jwt: nextAuthConfig.jwt,

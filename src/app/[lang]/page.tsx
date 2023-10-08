@@ -7,14 +7,17 @@ import dayjs from 'dayjs';
 import { Header } from '~/components/Header';
 import { useTranslations } from 'next-intl';
 import Link from 'next-intl/link';
+import { useRouter } from 'next-intl/client';
 
 export default function Page() {
   const session = useSession();
   const t = useTranslations();
+  const router = useRouter();
 
   const handleLogout = async () => {
     const result = await signOut({ redirect: false });
     console.log('🚀 ~ handleLogout ~ result:', result);
+    router.refresh();
   };
 
   return (
