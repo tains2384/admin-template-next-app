@@ -1,4 +1,4 @@
-import { ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import { ChevronDownIcon, ChevronUpIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import React from 'react';
 import { Button } from '../ui/button';
 import { FormField, FormItem, FormMessage } from '../ui/form';
@@ -7,27 +7,19 @@ import { SelectRemoteOptionForm } from './SelectRemoteOptionForm';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
 import { useTranslations } from 'next-intl';
-import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
+import { FieldArrayWithId, UseFieldArrayMove, UseFieldArrayRemove, useFormContext } from 'react-hook-form';
 import { get } from 'lodash';
 import { FormSchema } from '.';
 import { Input } from '../ui/input';
-import { ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '~/utils';
 
-export function FormBuilderItem({ index, isDragging }: { index: number; isDragging?: boolean }) {
+export function FormBuilderItem({ index, isDragging, field, move, remove, isFirst, isLast }: FormBuilderItemProps) {
   const t = useTranslations('form');
 
   const methods = useFormContext<FormSchema>();
   const { control } = methods;
 
-  const formValues = useWatch({ control });
-
-  const { fields, remove, swap } = useFieldArray({
-    control: control,
-    name: 'schema',
-  });
-
-  const componentType = get(formValues.schema, `${index}.type`);
+  const componentType = get(field, `type`);
 
   const handleRemoveComponent = (idx: number) => {
     console.log('🚀 ~ handleRemoveComponent ~ idx:', idx);
@@ -35,30 +27,28 @@ export function FormBuilderItem({ index, isDragging }: { index: number; isDraggi
   };
 
   const handleMoveDown = (currentIndex: number) => {
-    swap(currentIndex, Math.min(currentIndex + 1, fields.length - 1));
+    move(currentIndex, currentIndex + 1);
   };
 
   const handleMoveUp = (currentIndex: number) => {
-    swap(currentIndex, Math.max(currentIndex - 1, 0));
+    move(currentIndex, currentIndex - 1);
   };
-
-  const formLength = formValues.schema?.length || 0;
 
   return (
     <div className="grid grid-cols-2 gap-4 pr-14 relative p-3 rounded border border-gray-200 bg-white">
       <div className="flex gap-2 absolute top-2 right-2">
         <button
           type="button"
-          disabled={index === 0}
-          className={cn({ 'opacity-50': index === 0 })}
+          disabled={isFirst}
+          className={cn({ 'opacity-50': isFirst })}
           onClick={handleMoveUp.bind(null, index)}
         >
           <ChevronUpIcon className="h-4 w-4" />
         </button>
         <button
           type="button"
-          disabled={index === Math.max(formLength - 1, 0)}
-          className={cn({ 'opacity-50': index === Math.max(formLength - 1, 0) })}
+          disabled={isLast}
+          className={cn({ 'opacity-50': isLast })}
           onClick={handleMoveDown.bind(null, index)}
         >
           <ChevronDownIcon className="h-4 w-4" />
@@ -71,7 +61,7 @@ export function FormBuilderItem({ index, isDragging }: { index: number; isDraggi
         render={({ field }) => (
           <FormItem>
             <Label>{t('component_type')}</Label>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select onValueChange={field.onChange} value={field.value}>
               <SelectTrigger className="">
                 <SelectValue placeholder="Select a component type" />
               </SelectTrigger>
@@ -99,7 +89,7 @@ export function FormBuilderItem({ index, isDragging }: { index: number; isDraggi
         render={({ field }) => (
           <FormItem>
             <Label>{t('component_name')}</Label>
-            <Input type="text" onChange={field.onChange} defaultValue={field.value} />
+            <Input type="text" onChange={field.onChange} value={field.value} />
             <FormMessage />
           </FormItem>
         )}
@@ -124,3 +114,13 @@ export function FormBuilderItem({ index, isDragging }: { index: number; isDraggi
     </div>
   );
 }
+
+type FormBuilderItemProps = {
+  index: number;
+  isDragging?: boolean;
+  field: FieldArrayWithId<FormSchema, 'schema', 'id'>;
+  move: UseFieldArrayMove;
+  remove: UseFieldArrayRemove;
+  isFirst?: boolean;
+  isLast?: boolean;
+};

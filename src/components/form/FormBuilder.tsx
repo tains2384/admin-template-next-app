@@ -1,24 +1,12 @@
 import { useTranslations } from 'next-intl';
 import React, { useState } from 'react';
-import { useForm, useFieldArray, SubmitHandler, FormProvider, useWatch, SubmitErrorHandler } from 'react-hook-form';
+import { useForm, useFieldArray, SubmitHandler, FormProvider, SubmitErrorHandler } from 'react-hook-form';
 import { Button } from '../ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { FormSchema } from './type';
 import { FormBuilderItem } from './FormBuilderItem';
-import {
-  DndContext,
-  DragEndEvent,
-  DragOverEvent,
-  DragOverlay,
-  DragStartEvent,
-  UniqueIdentifier,
-  closestCenter,
-  closestCorners,
-} from '@dnd-kit/core';
-import { SortableContext } from '@dnd-kit/sortable';
-import { SortableItem } from '../SortableItem';
-import { FormBuilderItemOverlay } from './FormBuilderItemOverlay';
+import { DragEndEvent, DragOverEvent, DragStartEvent, UniqueIdentifier } from '@dnd-kit/core';
 
 const formSchema = z.object({
   schema: z
@@ -69,7 +57,7 @@ export function FormBuilder({ onSubmit }: FormBuilderProps) {
 
   const { handleSubmit, control, clearErrors, getValues, formState } = methods;
 
-  const { fields, append, move } = useFieldArray({
+  const { fields, append, move, remove } = useFieldArray({
     control: control,
     name: 'schema',
   });
@@ -77,15 +65,13 @@ export function FormBuilder({ onSubmit }: FormBuilderProps) {
   const [draggingId, setDraggingId] = useState<UniqueIdentifier>('');
 
   const handleAddComponent = () => {
-    const items = getValues('schema');
+    // const items = getValues('schema');
     // const lastItemInArray = get(items, `${Math.max(items.length - 1, 0)}`);
     // if (lastItemInArray && lastItemInArray.type === '' && lastItemInArray.name === '') return;
 
     append({ type: 'input', name: '' });
-    clearErrors(`schema.${Math.max(items.length, 0)}`);
+    // clearErrors(`schema.${Math.max(items.length, 0)}`);
   };
-
-  const formValue = useWatch({ control });
 
   const handleError: SubmitErrorHandler<FormSchema> = (error) => {
     console.log('🚀 ~ handleError ~ error:', error);
@@ -146,9 +132,19 @@ export function FormBuilder({ onSubmit }: FormBuilderProps) {
           </DragOverlay>
         </DndContext> */}
 
-        {fields.map((item, index) => (
-          <FormBuilderItem key={item.id} index={index} />
-        ))}
+        {fields.map((field, index) => {
+          return (
+            <FormBuilderItem
+              key={field.id}
+              index={index}
+              field={field}
+              move={move}
+              remove={remove}
+              isFirst={index === 0}
+              isLast={index === fields.length - 1}
+            />
+          );
+        })}
 
         <div className="grid grid-cols-2 gap-4">
           <Button type="button" variant="outline" className="w-full" onClick={handleAddComponent}>
@@ -159,7 +155,7 @@ export function FormBuilder({ onSubmit }: FormBuilderProps) {
           </Button>
         </div>
 
-        <pre className="whitespace-break-spaces">{JSON.stringify(formValue, null, 4)}</pre>
+        <pre className="whitespace-break-spaces">{JSON.stringify(fields, null, 4)}</pre>
       </form>
     </FormProvider>
   );
